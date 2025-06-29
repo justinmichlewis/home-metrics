@@ -30,11 +30,6 @@ class SensorData:
         return f"{self.temperature:.2f}, {self.humidity:.2f}, {self.pressure:.2f}, {self.gas_resistance:.2f}"
 
 
-def convert_celsius_to_fahrenheit(celsius):
-    """Convert Celsius to Fahrenheit."""
-    return (celsius * 9 / 5) + 32
-
-
 def get_bme680_readings():
     if sensor.get_sensor_data():
         return SensorData(

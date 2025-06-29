@@ -1,6 +1,7 @@
 import sqlite3
 import os
 from typing import Optional
+from datetime import datetime, timezone
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "data.db")
@@ -116,7 +117,7 @@ def read_entry_meta_data():
 #     ac INTEGER,
 #     converings INTEGER,
 #     notes TEXT,
-#     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+#     created_at TEXT DEFAULT (STRFTIME('%Y-%m-%dT%H:%M:%SZ', 'NOW')),
 #     FOREIGN KEY (reading_id) REFERENCES bme680_readings(reading_id)
 # );
 
@@ -127,5 +128,5 @@ def read_entry_meta_data():
 #     humidity REAL,
 #     pressure REAL,
 #     gas_resistance REAL,
-#     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+#     created_at TEXT DEFAULT (STRFTIME('%Y-%m-%dT%H:%M:%SZ', 'NOW'))
 # );

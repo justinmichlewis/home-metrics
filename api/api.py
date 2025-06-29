@@ -1,4 +1,5 @@
 from flask import Flask, jsonify, request
+from flask_cors import CORS
 from db.temperature_db import (
     read_entries,
     create_bme680_entry,
@@ -7,6 +8,8 @@ from db.temperature_db import (
 )
 
 app = Flask(__name__)
+
+CORS(app, origins=["http://localhost:5173"])
 
 
 # GET all BME680 readings with metadata
@@ -38,7 +41,7 @@ def create_reading():
         return jsonify({"error": str(e)}), 500
 
 
-# POST a new BME680 reading
+# POST a new meta_data reading
 @app.route("/api/bme680_readings/meta_data", methods=["POST"])
 def create_meta_data():
     data = request.get_json()
