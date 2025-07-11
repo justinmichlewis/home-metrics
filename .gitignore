@@ -2,4 +2,5 @@ bme680-env/
 __pycache__/
 *.pyc
 .env
-data.db
+*.sqlite
+*.db
