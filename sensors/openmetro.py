@@ -15,8 +15,8 @@ def get_openmetro_readings(start_date, end_date):
     # The order of variables in hourly or daily is important to assign them correctly below
     url = "https://api.open-meteo.com/v1/forecast"
     params = {
-        "latitude": 45.5152,
-        "longitude": 122.6784,
+        "latitude": 45.5657,
+        "longitude": -122.6184,
         "hourly": ["temperature_2m", "relative_humidity_2m"],
         "start_date": start_date.split("T")[0],
         "end_date": end_date.split("T")[0],
