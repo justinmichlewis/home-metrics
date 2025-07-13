@@ -1,6 +1,7 @@
 import sqlite3
 import os
 from typing import Optional
+from datetime import timezone, datetime
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "data.db")
@@ -25,18 +26,7 @@ def read_entries(start_date, end_date):
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
 
-    where_clause = ""
-
-    if not end_date or start_date == end_date:
-        where_clause = f"= '{ start_date.split('T')[0] }' "
-    elif start_date and end_date:
-        where_clause = (
-            f"BETWEEN '{start_date.split('T')[0]}' AND '{end_date.split('T')[0]}'"
-        )
-    else:
-        raise ValueError("Either start_date or end_date must be provided.")
-
-    query = f"""
+    query = """
         SELECT
             b.reading_id,
             b.temperature,
@@ -44,7 +34,6 @@ def read_entries(start_date, end_date):
             b.pressure,
             b.gas_resistance,
             b.created_at AS reading_created_at,
-            DATE(b.created_at) AS reading_date,
             e.entry_id,
             e.ac,
             e.converings,
@@ -53,11 +42,10 @@ def read_entries(start_date, end_date):
         FROM bme680_readings AS b
         LEFT JOIN entry_meta_data AS e
         ON b.reading_id = e.reading_id
-        WHERE DATE(b.created_at) {where_clause}
+        WHERE b.created_at BETWEEN ? AND ?
         ORDER BY b.reading_id DESC
     """
-
-    c = conn.execute(query)
+    c = conn.execute(query, (start_date, end_date))
 
     rows = [dict(row) for row in c.fetchall()]
     conn.close()
