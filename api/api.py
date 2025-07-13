@@ -6,6 +6,7 @@ path.append(os.path.join(os.path.dirname(__file__), ".."))
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from datetime import datetime
+import pytz
 import logging
 from db.temperature_db import (
     read_entries,
@@ -135,6 +136,8 @@ def get_historical_readings(start_date=None, end_date=None):
     start_date = request.args.get("startDate")
     end_date = request.args.get("endDate")
 
+    print(f"HIST- Received request with startDate: {start_date}, endDate: {end_date}")
+
     if not start_date or not end_date:
         return (
             jsonify({"error": "startDate & endDate query parameter is required"}),
@@ -159,8 +162,14 @@ def get_all_readings():
             400,
         )
 
-    historical_readings = get_historical_readings(start_date, end_date)
-    bme680_readings = get_bme680_data(start_date, end_date)
+    historical_readings = get_historical_readings(
+        start_date,
+        end_date,
+    )
+    bme680_readings = get_bme680_data(
+        start_date,
+        end_date,
+    )
 
     if len(bme680_readings) > 0 and len(historical_readings) > 0:
         map_historical_data = {
@@ -181,10 +190,13 @@ def get_all_readings():
             merged_item["historicalHumidity"] = match["humid"]
             merged_data.append(merged_item)
 
-    return merged_data
+        return merged_data
+
+    else:
+        return []
 
 
-def get_bme680_data(start_date=None, end_date=None):
+def get_bme680_data(start_date, end_date):
     print(f"Received request with startDate: {start_date}, endDate: {end_date}")
     readings = read_entries(start_date, end_date)
 
@@ -210,6 +222,21 @@ def get_bme680_data(start_date=None, end_date=None):
         for reading in readings
     ]
     return transformed_readings
+    return []
+
+
+def localize_datetime(utc_str):
+    utc_time = datetime.strptime(utc_str, "%Y-%m-%dT%H:%M:%S.%fZ")
+    utc_time = utc_time.replace(tzinfo=pytz.utc)
+
+    # Convert to Pacific Time (automatically handles PDT/PST)
+    pacific = pytz.timezone("US/Pacific")
+    pacific_time = utc_time.astimezone(pacific)
+
+    # Format the result in the same ISO 8601 format
+    formatted = pacific_time.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
+
+    return formatted
 
 
 if __name__ == "__main__":
